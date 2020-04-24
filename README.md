@@ -94,6 +94,8 @@ php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/B
 php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/BusinessMutexTest.php --filter=testSynchronizedUnlockTimeOut
 php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/BusinessMutexTest.php --filter=testUnlockTimeout
 
+# 测试互斥锁(非堵塞):未加时,解锁异常
+php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/BusinessMutexTest.php --filter=testUnlockNoLockUnLockFailException
 
 # 测试互斥锁(堵塞):20秒内多次加锁会堵塞
 php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/MutexTest.php --filter=testLock

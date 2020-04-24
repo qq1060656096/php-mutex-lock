@@ -133,4 +133,17 @@ class BusinessMutexTest extends TestCase
         sleep(6);
         $obj->unlock();
     }
+    
+    /**
+     * 未加锁时, 解锁异常
+     * @expectedException  \Zwei\Sync\Exception\NoLockUnLockFailException
+     */
+    public function testUnlockNoLockUnLockFailException()
+    {
+        $expired = Helper::secondsToMilliseconds(5);
+        $operationName = 'phpunit.20200424';
+        $id = 8;
+        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
+        $obj->unlock();
+    }
 }

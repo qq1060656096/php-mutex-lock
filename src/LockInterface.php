@@ -12,6 +12,7 @@ namespace Zwei\Sync;
 use Zwei\Sync\Exception\LockFailException;
 use Zwei\Sync\Exception\LockParamException;
 use Zwei\Sync\Exception\LockTimeoutException;
+use Zwei\Sync\Exception\NoLockUnLockFailException;
 use Zwei\Sync\Exception\UnLockTimeoutException;
 
 interface LockInterface
@@ -38,8 +39,13 @@ interface LockInterface
     public function lock();
     
     /**
+     * @return bool
+     */
+    public function isLocked();
+    
+    /**
      * @return integer
-     * @throws UnLockTimeoutException
+     * @throws UnLockTimeoutException|NoLockUnLockFailException
      */
     public function unlock();
     

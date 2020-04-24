@@ -9,6 +9,7 @@
 namespace Zwei\Sync;
 
 
+use Zwei\Sync\Exception\NoLockUnLockFailException;
 use Zwei\Sync\Exception\UnLockTimeoutException;
 use Zwei\Sync\Helper\Helper;
 
@@ -21,6 +22,8 @@ class LockAbstract implements LockInterface
     protected $lockRepositoryInterface;
     
     protected $startMilliseconds = 0;
+    
+    protected $isLocked = false;
     
     /**
      * @inheritdoc
@@ -51,14 +54,28 @@ class LockAbstract implements LockInterface
      */
     public function lock()
     {
-        return $this->getLockRepositoryInterface()->lock($this->getName(), $this->getExpired());
+        $bool = $this->getLockRepositoryInterface()->lock($this->getName(), $this->getExpired());
+        $this->isLocked = true;
+        return $bool;
     }
     
+    /**
+     * @return bool
+     */
+    public function isLocked()
+    {
+        return $this->isLocked;
+    }
     /**
      * @inheritdoc
      */
     public function unlock()
     {
+        // 防止未加锁,解锁情况
+        if (!$this->isLocked()) {
+            throw new NoLockUnLockFailException("unlock.fail.noLock");
+        }
+        $this->isLocked = false;
         // 解锁超时(所超时，解锁导致其他用户加锁被解锁，从而导致更严重的问题)
         if ($this->checkLockTimeOut()) {
             throw new UnLockTimeoutException('unlock.timeout');
