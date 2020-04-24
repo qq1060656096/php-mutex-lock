@@ -22,7 +22,7 @@ class OrderBusinessMutex extends BusinessMutex
     
     public function __construct(LockRepositoryInterface $lockRepositoryInterface, $expired, $orderId)
     {
-        $operationName = "order";
+        $operationName = $this->operationName;
         $args = [
             $orderId
         ];

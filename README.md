@@ -31,9 +31,42 @@ php 互斥锁
 > 执行composer install
 
 
-## 安装方式2
-```sh
-composer require "zwei/php-sync:0.0.1"
+
+
+
+### 示例1
+```
+use Zwei\Sync\Mutex\OrderBusinessMutex;
+try {
+    $orderDemoBusinessMutex = new OrderBusinessMutex();
+    $orderDemoBusinessMutex->synchronized(function(){
+        // todo
+    });
+} catch (LockFailException $exception) {
+    // 其他人正在操作, 请稍后在试
+} catch (LockTimeoutException $exception) {
+    // 加锁超时
+} catch (UnLockTimeoutException $exception) {
+    // 解锁超时
+}
+```
+
+### 示例2
+```
+use Zwei\Sync\Mutex\OrderBusinessMutex;
+
+try {
+    $orderDemoBusinessMutex = new OrderBusinessMutex();
+    $orderDemoBusinessMutex->lock();
+    // todo
+    $orderDemoBusinessMutex->unlock();
+} catch (LockFailException $exception) {
+    // 其他人正在操作, 请稍后在试
+} catch (LockTimeoutException $exception) {
+    // 加锁超时
+} catch (UnLockTimeoutException $exception) {
+    // 解锁超时
+}
 ```
 
 
