@@ -55,6 +55,7 @@ class LockAbstract implements LockInterface
     public function lock()
     {
         $bool = $this->getLockRepositoryInterface()->lock($this->getName(), $this->getExpired());
+        $this->setStartMilliseconds();
         $this->isLocked = true;
         return $bool;
     }
