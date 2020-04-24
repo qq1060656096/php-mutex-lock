@@ -35,7 +35,7 @@ php 互斥锁
 
 
 ### 示例1
-```
+```php
 <?php
 use Zwei\Sync\Mutex\OrderBusinessMutex;
 try {
@@ -53,7 +53,7 @@ try {
 ```
 
 ### 示例2
-```
+```php
 <?php
 use Zwei\Sync\Mutex\OrderBusinessMutex;
 
