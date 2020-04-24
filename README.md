@@ -34,13 +34,13 @@ php 互斥锁
 
 
 
-### 示例1
+### 业务锁示例1
 ```php
 <?php
 use Zwei\Sync\Mutex\OrderBusinessMutex;
 try {
-    $orderDemoBusinessMutex = new OrderBusinessMutex();
-    $orderDemoBusinessMutex->synchronized(function(){
+    $orderBusinessMutex = new OrderBusinessMutex();
+    $orderBusinessMutex->synchronized(function(){
         // todo
     });
 } catch (LockFailException $exception) {
@@ -52,16 +52,16 @@ try {
 }
 ```
 
-### 示例2
+### 业务锁示例2
 ```php
 <?php
 use Zwei\Sync\Mutex\OrderBusinessMutex;
 
 try {
-    $orderDemoBusinessMutex = new OrderBusinessMutex();
-    $orderDemoBusinessMutex->lock();
+    $orderBusinessMutex = new OrderBusinessMutex();
+    $orderBusinessMutex->lock();
     // todo
-    $orderDemoBusinessMutex->unlock();
+    $orderBusinessMutex->unlock();
 } catch (LockFailException $exception) {
     // 其他人正在操作, 请稍后在试
 } catch (LockTimeoutException $exception) {
