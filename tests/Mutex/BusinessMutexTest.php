@@ -9,6 +9,7 @@ namespace Zwei\Sync\Tests\Mutex;
 
 use PHPUnit\Framework\TestCase;
 use Zwei\Sync\Exception\LockFailException;
+use Zwei\Sync\Exception\UnLockTimeoutException;
 use Zwei\Sync\Helper\Helper;
 use Zwei\Sync\Mutex\BusinessMutex;
 
@@ -83,17 +84,17 @@ class BusinessMutexTest extends TestCase
      *
      * @throws LockFailException
      * @throws \Throwable
-     * @throws \Zwei\Sync\Exception\LockParamException
+     * @throws Zwei\Sync\Exception\LockParamException
      */
     public function testSynchronized()
     {
-        $expired = Helper::secondsToMilliseconds(60);
+        $expired = Helper::secondsToMilliseconds(5);
         $operationName = 'phpunit.20200424';
         $id = 5;
         $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
         $testCase = $this;
         $obj->synchronized(function() use ($testCase) {
-            sleep(20);
+            sleep(3);
             $testCase->assertTrue(true);
         });
         $this->assertTrue(true);
@@ -112,7 +113,7 @@ class BusinessMutexTest extends TestCase
         $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
         $testCase = $this;
         $obj->synchronized(function() use ($testCase) {
-            sleep(7);
+            sleep(6);
             $testCase->assertTrue(true);
         });
         $this->assertTrue(true);

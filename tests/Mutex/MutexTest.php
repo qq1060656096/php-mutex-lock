@@ -68,12 +68,12 @@ class MutexTest extends TestCase
      */
     public function testSynchronized()
     {
-        $expired = Helper::secondsToMilliseconds(20);
+        $expired = Helper::secondsToMilliseconds(5);
         $name = 'phpunit.mutex.20200424.4';
         $obj = new Mutex($this->getRedisLockRepository(), $expired, $name);
         $testCase = $this;
         $obj->synchronized(function() use ($testCase) {
-            sleep(10);
+            sleep(3);
             $testCase->assertTrue(true);
         });
         $this->assertTrue(true);
@@ -82,7 +82,7 @@ class MutexTest extends TestCase
     /**
      * 测试匿名方法解锁超时
      *
-     * @expectedException Zwei\Sync\Exception\UnLockTimeoutException
+     * @expectedException \Zwei\Sync\Exception\UnLockTimeoutException
      */
     public function testSynchronizedUnlockTimeOut()
     {
@@ -99,7 +99,7 @@ class MutexTest extends TestCase
     
     /**
      * 测试解锁超时
-     * @expectedException Zwei\Sync\Exception\UnLockTimeoutException
+     * @expectedException \Zwei\Sync\Exception\UnLockTimeoutException
      */
     public function testUnlockTimeout()
     {
