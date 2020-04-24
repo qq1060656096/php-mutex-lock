@@ -11,26 +11,13 @@ use PHPUnit\Framework\TestCase;
 use Zwei\Sync\Exception\LockFailException;
 use Zwei\Sync\Helper\Helper;
 use Zwei\Sync\Mutex\BusinessMutex;
-use Zwei\Sync\Repository\RedisLockRepository;
 
 class BusinessMutexTest extends TestCase
 {
-    public function getRedis()
-    {
-        $host = '199.199.199.199';
-        $post = 16379;
-        $password = '000000';
-        $redis = new \Redis();
-        $redis->connect($host, $post);
-        $redis->auth($password);
-        return $redis;
-    }
+    use RedisTrait;
+    use RedisRepositoryTrait;
     
-    public function getRedisLockRepository()
-    {
-        $obj = new RedisLockRepository($this->getRedis());
-        return $obj;
-    }
+    
     
     /**
      * 测试锁名

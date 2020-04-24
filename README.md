@@ -1,6 +1,16 @@
 # php-sync
 php 互斥锁
 
+| 锁类型 | 堵塞类型 | 分布式 | 锁时间 |
+| :------- | :----  | :----  | :----  |
+| 互斥锁(Mutex)    | 堵塞   | 支持 | 毫秒级 |
+| 业务互斥锁(BusinessMutex)  |堵塞   | 支持 | 毫秒级 |
+| 示例订单业务互斥锁(OrderBusinessMutex) | 非堵塞  | 支持 | 毫秒级 |
+
+| 锁仓储类型 | 是否支持 |
+| :------- | :----  |
+| Redis    | 支持   |
+| Mysql    | 待开发  |
 
 ## 安装方式1
 > 创建composer.json文件,并写入以下内容:
@@ -10,11 +20,11 @@ php 互斥锁
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/qq1060656096/collection.git"
+            "url": "https://github.com/qq1060656096/php-sync.git"
         }
     ],
     "require": {
-        "zwei/collection": "0.0.1"
+        "zwei/php-sync": "0.0.1"
     }
 }
 ```
@@ -63,5 +73,13 @@ php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/M
 # 测试互斥锁(堵塞):解锁超时
 php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/MutexTest.php --filter=testSynchronizedUnlockTimeOut
 php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/MutexTest.php --filter=testUnlockTimeout
+
+```
+
+### 订单业务锁
+```
+# 测试互斥锁(堵塞):解锁超时
+php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/OrderBusinessMutexTest.php --filter=testSynchronizedUnlockTimeOut
+php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/OrderBusinessMutexTest.php --filter=testUnlockTimeout
 
 ```

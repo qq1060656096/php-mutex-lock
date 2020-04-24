@@ -8,6 +8,8 @@
 
 namespace Zwei\Sync\Mutex;
 
+use Zwei\Sync\LockRepositoryInterface;
+
 /**
  * 订单业务锁
  *
@@ -18,7 +20,7 @@ class OrderBusinessMutex extends BusinessMutex
 {
     protected $operationName = 'order';
     
-    public function __construct(LockRepositoryInterface $lockRepositoryInterface, $orderId, $expired)
+    public function __construct(LockRepositoryInterface $lockRepositoryInterface, $expired, $orderId)
     {
         $operationName = "order";
         $args = [

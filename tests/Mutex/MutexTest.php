@@ -12,26 +12,11 @@ namespace Zwei\Sync\Tests\Mutex;
 use PHPUnit\Framework\TestCase;
 use Zwei\Sync\Helper\Helper;
 use Zwei\Sync\Mutex\Mutex;
-use Zwei\Sync\Repository\RedisLockRepository;
 
 class MutexTest extends TestCase
 {
-    public function getRedis()
-    {
-        $host = '199.199.199.199';
-        $post = 16379;
-        $password = '000000';
-        $redis = new \Redis();
-        $redis->connect($host, $post);
-        $redis->auth($password);
-        return $redis;
-    }
-    
-    public function getRedisLockRepository()
-    {
-        $obj = new RedisLockRepository($this->getRedis());
-        return $obj;
-    }
+    use RedisTrait;
+    use RedisRepositoryTrait;
     
     /**
      * 测试锁名
