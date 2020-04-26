@@ -41,6 +41,10 @@ class BusinessMutex extends LockAbstract
     
     protected function setName()
     {
-        $this->name = Helper::generateLockName($this->operationName, ...$this->args);
+        $index = 0;
+        foreach ($this->args as $arg) {
+            $this->names[$index] = Helper::generateLockName($this->operationName, $arg);
+            $index ++;
+        }
     }
 }

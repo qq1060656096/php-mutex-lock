@@ -11,6 +11,9 @@ namespace Zwei\Sync\Repository;
 use Redis;
 use Zwei\Sync\Exception\LockFailException;
 use Zwei\Sync\Exception\LockParamException;
+use Zwei\Sync\Exception\LockTimeoutException;
+use Zwei\Sync\Exception\UnLockTimeoutException;
+use Zwei\Sync\Helper\Helper;
 use Zwei\Sync\LockRepositoryInterface;
 
 class RedisLockRepository implements LockRepositoryInterface
@@ -36,35 +39,82 @@ class RedisLockRepository implements LockRepositoryInterface
     /**
      * 加锁
      *
-     * @param string $lockName
-     * @param integer $milliseconds
-     * @return bool
-     * @throws LockParamException|LockFailException
+     * @inheritdoc
      */
-    public function lock($lockName, $milliseconds)
+    public function lock($clientId, $expired, ...$lockNames)
     {
-        if (!is_numeric($milliseconds) || $milliseconds < 1) {
-            throw new LockParamException("lock.param.milliseconds.error");
-        }
+        Helper::validateLockExpired($expired);
+        Helper::validateLockNames(...$lockNames);
+        $numKeys = count($lockNames);
+        $lua = [];
+        $lua[] = "local keysOkCount = 0;";
+        $lua[] = "local operationOk = false;";
+        $index = 0;
+        $keys = [];
+        $values = [];
+        $delKeys = [];
+        foreach ($lockNames as $key) {
+            $value = $clientId;
+            $index ++;
+            $lua[] = <<<str
+operationOk  = redis.call('set', KEYS[{$index}], ARGV[{$index}], 'PX', {$expired}, 'NX');
+str;
+            $lua[] = <<<str
+if (operationOk) then keysOkCount = keysOkCount + 1 end;
+str;
         
-        $cacheKey = $lockName;
-        $value = time();
-        $bool = $this->getRedis()->rawCommand("set", $cacheKey, $value, "PX", $milliseconds, "NX");
-        if ($bool === true) {
-            return true;
+            $keys[] = $key;
+            $values[] = $value;
+            $delKeys[] = "KEYS[{$index}]";
         }
-        throw new LockFailException("lock.fail");
+        $delKeysStr = implode(", ", $delKeys);
+        $lua[] = <<<str
+if (keysOkCount ~= {$numKeys}) then redis.call('del', {$delKeysStr}); keysOkCount = 0;end;
+str;
+        $lua[] = "return keysOkCount;";
+        $luaScript = implode("", $lua);
+        $args = array_merge($keys, $values);
+        $intResult = $this->getRedis()->eval($luaScript, $args, $numKeys);
+        if ($intResult < 1) {
+            LockTimeoutException::timeout();
+        }
+        return $intResult;
     }
     
     /**
      * 解锁
      *
-     * @param string $lockName
-     * @return int
+     * @inheritdoc
      */
-    public function unlock($lockName)
+    public function unlock($clientId, ...$lockNames)
     {
-        $del = $this->getRedis()->del($lockName);
-        return $del;
+        Helper::validateLockNames(...$lockNames);
+        $numKeys = count($lockNames);
+        $lua = [];
+        $lua[] = "local keysDelOkCount = 0;";
+        $lua[] = "local tmpVal = nil;";
+        $index = 0;
+        $keys = [];
+        $values = [];
+        foreach ($lockNames as $key) {
+            $value = $clientId;
+            $index ++;
+            $lua[] = <<<str
+tmpVal  = redis.call('get', KEYS[{$index}]);
+str;
+            $lua[] = <<<str
+if (tmpVal == ARGV[1]) then keysDelOkCount = keysDelOkCount + redis.call('del', KEYS[{$index}]) end;
+str;
+            $keys[] = $key;
+            $values[] = $value;
+        }
+        $lua[] = "return keysDelOkCount;";
+        $luaScript = implode("", $lua);
+        $args = array_merge($keys, $values);
+        $result = $this->getRedis()->eval($luaScript, $args, $numKeys);
+        if ($result < 1) {
+            UnLockTimeoutException::timeout();
+        }
+        return $result;
     }
 }

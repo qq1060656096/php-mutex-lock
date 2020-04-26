@@ -20,12 +20,17 @@ class OrderBusinessMutex extends BusinessMutex
 {
     protected $operationName = 'order';
     
-    public function __construct(LockRepositoryInterface $lockRepositoryInterface, $expired, $orderId)
+    /**
+     * 订单业务锁可以锁定多个订单
+     *
+     * @param LockRepositoryInterface $lockRepositoryInterface
+     * @param integer $expired
+     * @param integer ...$orderIds
+     */
+    public function __construct(LockRepositoryInterface $lockRepositoryInterface, $expired, ...$orderIds)
     {
         $operationName = $this->operationName;
-        $args = [
-            $orderId
-        ];
+        $args = $orderIds;
         parent::__construct($lockRepositoryInterface, $expired, $operationName, ...$args);
     }
 }

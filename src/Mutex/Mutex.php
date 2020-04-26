@@ -29,13 +29,14 @@ class Mutex extends LockAbstract
      * Mutex constructor.
      * @param LockRepositoryInterface $lockRepositoryInterface
      * @param string $expired milliseconds
-     * @param string $name
+     * @param string ...$names
      */
-    public function __construct(LockRepositoryInterface $lockRepositoryInterface, $expired, $name)
+    public function __construct(LockRepositoryInterface $lockRepositoryInterface, $expired, ...$names)
     {
         $this->lockRepositoryInterface = $lockRepositoryInterface;
         $this->expired = $expired;
-        $this->name = $name;
+        $this->names = $names;
+        $this->clientId = uniqid('mutex');
     }
     
     /**
@@ -52,7 +53,7 @@ class Mutex extends LockAbstract
             } catch (LockFailException $exception) {
                 // 加锁失败就堵塞, 加锁超时
                 if ($this->checkLockTimeOut()) {
-                    throw new LockTimeoutException('lock.timeout');
+                    LockTimeoutException::timeout();
                 }
             }
             

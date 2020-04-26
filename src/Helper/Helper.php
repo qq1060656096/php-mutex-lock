@@ -7,6 +7,8 @@
  */
 namespace Zwei\Sync\Helper;
 
+use Zwei\Sync\Exception\LockParamException;
+
 class Helper
 {
     /**
@@ -44,5 +46,36 @@ class Helper
         $milliseconds = microtime(true) * 1000;
         $millisecondsArr = explode('.', $milliseconds);
         return $millisecondsArr[0];
+    }
+    
+
+    /**
+     * 验证锁过期时间
+     * @param integer $expired expired time(milliseconds)
+     * @throws LockParamException
+     */
+    public static function validateLockExpired($expired)
+    {
+        if (!is_numeric($expired) || $expired < 1) {
+            LockParamException::paramExpiredOverMin();
+        }
+    }
+    
+    /**
+     * 验证锁名是字符串
+     *
+     * @param string ...$lockNames
+     * @throws LockParamException
+     */
+    public static function validateLockNames(...$lockNames)
+    {
+        if (count($lockNames) < 1) {
+            LockParamException::paramLockNamesIsEmpty();
+        }
+        foreach ($lockNames as $name) {
+            if (!is_string($name)) {
+                LockParamException::paramLockNamesIsNotString();
+            }
+        }
     }
 }

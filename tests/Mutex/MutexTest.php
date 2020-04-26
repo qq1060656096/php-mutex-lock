@@ -12,10 +12,10 @@ namespace Zwei\Sync\Tests\Mutex;
 use PHPUnit\Framework\TestCase;
 use Zwei\Sync\Helper\Helper;
 use Zwei\Sync\Mutex\Mutex;
+use Zwei\Sync\Tests\Repository\RedisRepositoryTrait;
 
 class MutexTest extends TestCase
 {
-    use RedisTrait;
     use RedisRepositoryTrait;
     
     /**
@@ -24,9 +24,9 @@ class MutexTest extends TestCase
     public function testGetName()
     {
         $expired = 1;
-        $name = 'phpunit.mutex.20200424.1';
-        $obj = new Mutex($this->getRedisLockRepository(), $expired, $name);
-        $this->assertEquals('phpunit.mutex.20200424.1', $obj->getName());
+        $names = ['phpunit.mutex.20200424.1'];
+        $obj = new Mutex($this->getRedisLockRepository(), $expired, ...$names);
+        $this->assertEquals(['phpunit.mutex.20200424.1'], $obj->getNames());
     }
     
     
@@ -37,8 +37,8 @@ class MutexTest extends TestCase
     public function testLock()
     {
         $expired = Helper::secondsToMilliseconds(5);
-        $name = 'phpunit.mutex.20200424.2';
-        $obj = new Mutex($this->getRedisLockRepository(), $expired, $name);
+        $names = ['phpunit.mutex.20200424.2'];
+        $obj = new Mutex($this->getRedisLockRepository(), $expired, ...$names);
         $obj->lock();
         $this->assertTrue(true);
     }
@@ -51,8 +51,8 @@ class MutexTest extends TestCase
     public function testLockAndUnlock()
     {
         $expired = Helper::secondsToMilliseconds(20);
-        $name = 'phpunit.mutex.20200424.3';
-        $obj = new Mutex($this->getRedisLockRepository(), $expired, $name);
+        $names = ['phpunit.mutex.20200424.3'];
+        $obj = new Mutex($this->getRedisLockRepository(), $expired, ...$names);
         $obj->lock();
         $obj->unlock();
         $obj->lock();
@@ -69,8 +69,8 @@ class MutexTest extends TestCase
     public function testSynchronized()
     {
         $expired = Helper::secondsToMilliseconds(5);
-        $name = 'phpunit.mutex.20200424.4';
-        $obj = new Mutex($this->getRedisLockRepository(), $expired, $name);
+        $names = ['phpunit.mutex.20200424.4'];
+        $obj = new Mutex($this->getRedisLockRepository(), $expired, ...$names);
         $testCase = $this;
         $obj->synchronized(function() use ($testCase) {
             sleep(3);
@@ -87,8 +87,8 @@ class MutexTest extends TestCase
     public function testSynchronizedUnlockTimeOut()
     {
         $expired = Helper::secondsToMilliseconds(5);
-        $name = 'phpunit.mutex.20200424.5';
-        $obj = new Mutex($this->getRedisLockRepository(), $expired, $name);
+        $names = ['phpunit.mutex.20200424.5'];
+        $obj = new Mutex($this->getRedisLockRepository(), $expired, ...$names);
         $testCase = $this;
         $obj->synchronized(function() use ($testCase) {
             sleep(7);
@@ -104,8 +104,8 @@ class MutexTest extends TestCase
     public function testUnlockTimeout()
     {
         $expired = Helper::secondsToMilliseconds(5);
-        $name = 'phpunit.mutex.20200424.6';
-        $obj = new Mutex($this->getRedisLockRepository(), $expired, $name);
+        $names = ['phpunit.mutex.20200424.6'];
+        $obj = new Mutex($this->getRedisLockRepository(), $expired, ...$names);
         $obj->lock();
         sleep(6);
         $obj->unlock();

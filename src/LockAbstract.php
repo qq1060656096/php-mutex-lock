@@ -15,7 +15,9 @@ use Zwei\Sync\Helper\Helper;
 
 class LockAbstract implements LockInterface
 {
-    protected $name;
+    protected $clientId;
+    
+    protected $names;
     
     protected $expired;
     
@@ -28,9 +30,17 @@ class LockAbstract implements LockInterface
     /**
      * @inheritdoc
      */
-    public function getName()
+    public function getClientId()
     {
-        return $this->name;
+        return $this->clientId;
+    }
+    
+    /**
+     * @inheritdoc
+     */
+    public function getNames()
+    {
+        return $this->names;
     }
     
     /**
@@ -54,7 +64,7 @@ class LockAbstract implements LockInterface
      */
     public function lock()
     {
-        $bool = $this->getLockRepositoryInterface()->lock($this->getName(), $this->getExpired());
+        $bool = $this->getLockRepositoryInterface()->lock($this->getClientId(), $this->getExpired(), ...$this->getNames());
         $this->setStartMilliseconds();
         $this->isLocked = true;
         return $bool;
@@ -74,14 +84,14 @@ class LockAbstract implements LockInterface
     {
         // 防止未加锁,解锁情况
         if (!$this->isLocked()) {
-            throw new NoLockUnLockFailException("unlock.fail.noLock");
+            NoLockUnLockFailException::noLock();
         }
         $this->isLocked = false;
         // 解锁超时(所超时，解锁导致其他用户加锁被解锁，从而导致更严重的问题)
         if ($this->checkLockTimeOut()) {
-            throw new UnLockTimeoutException('unlock.timeout');
+            UnLockTimeoutException::timeout();
         }
-        return $this->getLockRepositoryInterface()->unlock($this->getName());
+        return $this->getLockRepositoryInterface()->unlock($this->getClientId(), ...$this->getNames());
     }
     
     /**

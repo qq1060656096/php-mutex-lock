@@ -6,11 +6,14 @@
  * Time: 15:52
  */
 
-namespace Zwei\Sync\Tests\Mutex;
+namespace Zwei\Sync\Tests\Repository;
 
 
 trait RedisTrait
 {
+    /**
+     * @return \Redis
+     */
     public function getRedis()
     {
         $host = '199.199.199.199';

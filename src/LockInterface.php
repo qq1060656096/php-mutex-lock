@@ -20,7 +20,12 @@ interface LockInterface
     /**
      * @return string
      */
-    public function getName();
+    public function getClientId();
+    
+    /**
+     * @return array [string]
+     */
+    public function getNames();
     
     /**
      * @return integer Milliseconds
@@ -45,7 +50,7 @@ interface LockInterface
     
     /**
      * @return integer
-     * @throws UnLockTimeoutException|NoLockUnLockFailException
+     * @throws LockParamException|NoLockUnLockFailException|UnLockTimeoutException
      */
     public function unlock();
     
@@ -53,7 +58,7 @@ interface LockInterface
      * @param callable $code
      * @return mixed
      * @throws LockParamException|LockFailException|LockTimeoutException
-     * @throws UnLockTimeoutException
+     * @throws LockParamException|NoLockUnLockFailException|UnLockTimeoutException
      * @throws \Exception
      * @throws \Throwable
      */

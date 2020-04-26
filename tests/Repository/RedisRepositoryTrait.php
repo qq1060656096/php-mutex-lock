@@ -6,13 +6,18 @@
  * Time: 15:54
  */
 
-namespace Zwei\Sync\Tests\Mutex;
+namespace Zwei\Sync\Tests\Repository;
 
 
 use Zwei\Sync\Repository\RedisLockRepository;
 
 trait RedisRepositoryTrait
 {
+    use RedisTrait;
+    
+    /**
+     * @return RedisLockRepository
+     */
     public function getRedisLockRepository()
     {
         $obj = new RedisLockRepository($this->getRedis());
