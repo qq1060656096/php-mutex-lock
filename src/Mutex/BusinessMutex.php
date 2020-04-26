@@ -37,6 +37,7 @@ class BusinessMutex extends LockAbstract
         $this->operationName = $operationName;
         $this->args = $args;
         $this->setName();
+        $this->clientId = uniqid('businessMutex');
     }
     
     protected function setName()

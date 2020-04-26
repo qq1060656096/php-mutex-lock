@@ -12,10 +12,10 @@ use Zwei\Sync\Exception\LockFailException;
 use Zwei\Sync\Exception\UnLockTimeoutException;
 use Zwei\Sync\Helper\Helper;
 use Zwei\Sync\Mutex\BusinessMutex;
+use Zwei\Sync\Tests\Repository\RedisRepositoryTrait;
 
 class BusinessMutexTest extends TestCase
 {
-    use RedisTrait;
     use RedisRepositoryTrait;
     
     
@@ -27,9 +27,9 @@ class BusinessMutexTest extends TestCase
     {
         $expired = 1;
         $operationName = 'phpunit.20200424';
-        $id = 1;
-        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
-        $this->assertEquals('phpunit.20200424:1', $obj->getName());
+        $ids = [1];
+        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, ...$ids);
+        $this->assertEquals(['phpunit.20200424:1'], $obj->getNames());
     }
     
     
@@ -43,8 +43,8 @@ class BusinessMutexTest extends TestCase
     {
         $expired = Helper::secondsToMilliseconds(20);
         $operationName = 'phpunit.20200424';
-        $id = 2;
-        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
+        $ids = [21, 22];
+        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, ...$ids);
         $obj->lock();
         $this->assertTrue(true);
     }
@@ -58,8 +58,8 @@ class BusinessMutexTest extends TestCase
     {
         $expired = Helper::secondsToMilliseconds(20);
         $operationName = 'phpunit.20200424';
-        $id = 3;
-        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
+        $ids = [32, 32];
+        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, ...$ids);
         $obj->lock();
         $obj->lock();
     }
@@ -71,8 +71,8 @@ class BusinessMutexTest extends TestCase
     {
         $expired = Helper::secondsToMilliseconds(20);
         $operationName = 'phpunit.20200424';
-        $id = 4;
-        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
+        $ids = [41, 42];
+        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, ...$ids);
         $obj->lock();
         $obj->unlock();
         $obj->lock();
@@ -90,8 +90,8 @@ class BusinessMutexTest extends TestCase
     {
         $expired = Helper::secondsToMilliseconds(5);
         $operationName = 'phpunit.20200424';
-        $id = 5;
-        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
+        $ids = [51, 52];
+        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, ...$ids);
         $testCase = $this;
         $obj->synchronized(function() use ($testCase) {
             sleep(3);
@@ -109,8 +109,8 @@ class BusinessMutexTest extends TestCase
     {
         $expired = Helper::secondsToMilliseconds(5);
         $operationName = 'phpunit.20200424';
-        $id = 6;
-        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
+        $ids = [61, 62];
+        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, ...$ids);
         $testCase = $this;
         $obj->synchronized(function() use ($testCase) {
             sleep(6);
@@ -127,8 +127,8 @@ class BusinessMutexTest extends TestCase
     {
         $expired = Helper::secondsToMilliseconds(5);
         $operationName = 'phpunit.20200424';
-        $id = 7;
-        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
+        $ids = [71, 72];
+        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, ...$ids);
         $obj->lock();
         sleep(6);
         $obj->unlock();
@@ -142,8 +142,8 @@ class BusinessMutexTest extends TestCase
     {
         $expired = Helper::secondsToMilliseconds(5);
         $operationName = 'phpunit.20200424';
-        $id = 8;
-        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, $id);
+        $ids = [81, 82];
+        $obj = new BusinessMutex($this->getRedisLockRepository(), $expired, $operationName, ...$ids);
         $obj->unlock();
     }
 }

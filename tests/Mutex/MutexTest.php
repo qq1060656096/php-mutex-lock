@@ -69,7 +69,7 @@ class MutexTest extends TestCase
     public function testSynchronized()
     {
         $expired = Helper::secondsToMilliseconds(5);
-        $names = ['phpunit.mutex.20200424.4'];
+        $names = ['phpunit.mutex.20200424.41', 'phpunit.mutex.20200424.42'];
         $obj = new Mutex($this->getRedisLockRepository(), $expired, ...$names);
         $testCase = $this;
         $obj->synchronized(function() use ($testCase) {

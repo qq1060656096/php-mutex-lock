@@ -76,7 +76,7 @@ str;
         $args = array_merge($keys, $values);
         $intResult = $this->getRedis()->eval($luaScript, $args, $numKeys);
         if ($intResult < 1) {
-            LockTimeoutException::timeout();
+            LockFailException::fail();
         }
         return $intResult;
     }
