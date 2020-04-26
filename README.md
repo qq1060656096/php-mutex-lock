@@ -46,40 +46,77 @@ CREATE TABLE `sync_lock` (
 
 
 
-### 业务锁示例1
+### 示例：订单业务锁示例1
 ```php
 <?php
+use Zwei\Sync\Exception\LockFailException;
+use Zwei\Sync\Exception\LockTimeoutException;
+use Zwei\Sync\Exception\UnLockTimeoutException;
+use Zwei\Sync\Helper\Helper;
 use Zwei\Sync\Mutex\OrderBusinessMutex;
+use Zwei\Sync\Repository\RedisLockRepository;
 try {
-    $orderBusinessMutex = new OrderBusinessMutex();
-    $orderBusinessMutex->synchronized(function(){
-        // todo
-    });
-} catch (LockFailException $exception) {
+    $host = '199.199.199.199';
+    $post = 16379;
+    $password = '000000';
+    $redis = new \Redis();
+    $redis->connect($host, $post);
+    $redis->auth($password);
+    
+    $redisRepository = new RedisLockRepository($redis);
+    $expired = Helper::secondsToMilliseconds(30);
+    $orderId = 1;
+    $orderDemoBusinessMutex = new OrderBusinessMutex($redisRepository, $expired, $orderId);
+    $orderDemoBusinessMutex->lock();
+    // todo
+    $orderDemoBusinessMutex->unlock();
+} catch (LockParamException $exception) {
+    // 参数错误
+}  catch (LockFailException $exception) {
     // 其他人正在操作, 请稍后在试
 } catch (LockTimeoutException $exception) {
     // 加锁超时
 } catch (UnLockTimeoutException $exception) {
     // 解锁超时
+} catch (NoLockUnLockFailException $exception) {
+    // 没有加锁时，解锁
 }
 ```
 
-### 业务锁示例2
+### 示例：订单业务锁示例2
 ```php
 <?php
+use Zwei\Sync\Exception\LockFailException;
+use Zwei\Sync\Exception\LockTimeoutException;
+use Zwei\Sync\Exception\UnLockTimeoutException;
+use Zwei\Sync\Helper\Helper;
 use Zwei\Sync\Mutex\OrderBusinessMutex;
-
+use Zwei\Sync\Repository\RedisLockRepository;
 try {
-    $orderBusinessMutex = new OrderBusinessMutex();
-    $orderBusinessMutex->lock();
-    // todo
-    $orderBusinessMutex->unlock();
-} catch (LockFailException $exception) {
+    $host = '199.199.199.199';
+    $post = 16379;
+    $password = '000000';
+    $redis = new \Redis();
+    $redis->connect($host, $post);
+    $redis->auth($password);
+
+    $redisRepository = new RedisLockRepository($redis);
+    $expired = Helper::secondsToMilliseconds(30);
+    $orderId = 1;
+    $orderBusinessMutex = new OrderBusinessMutex($redisRepository, $expired, $orderId);
+    $orderBusinessMutex->synchronized(function(){
+        // todo
+    });
+} catch (LockParamException $exception) {
+    // 参数错误
+}  catch (LockFailException $exception) {
     // 其他人正在操作, 请稍后在试
 } catch (LockTimeoutException $exception) {
     // 加锁超时
 } catch (UnLockTimeoutException $exception) {
     // 解锁超时
+} catch (NoLockUnLockFailException $exception) {
+    // 没有加锁时，解锁
 }
 ```
 

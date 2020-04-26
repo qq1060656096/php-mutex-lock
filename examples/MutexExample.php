@@ -11,14 +11,14 @@ use Zwei\Sync\Exception\LockFailException;
 use Zwei\Sync\Exception\LockTimeoutException;
 use Zwei\Sync\Exception\UnLockTimeoutException;
 use Zwei\Sync\Helper\Helper;
-use Zwei\Sync\Mutex\OrderBusinessMutex;
+use Zwei\Sync\Mutex\Mutex;
 use Zwei\Sync\Repository\RedisLockRepository;
 
-class OrderBusinessMutexExample
+class MutexExample
 {
     
     /**
-     * 订单审核
+     * sass订单审核
      *
      * @throws \Zwei\Sync\Exception\LockParamException
      * @throws \Zwei\Sync\Exception\NoLockUnLockFailException
@@ -35,11 +35,11 @@ class OrderBusinessMutexExample
             
             $redisRepository = new RedisLockRepository($redis);
             $expired = Helper::secondsToMilliseconds(30);
-            $orderId = 1;
-            $orderDemoBusinessMutex = new OrderBusinessMutex($redisRepository, $expired, $orderId);
-            $orderDemoBusinessMutex->lock();
+            $name = 'orderCheck';
+            $mutex = new Mutex($redisRepository, $expired, $name);
+            $mutex->lock();
             // todo
-            $orderDemoBusinessMutex->unlock();
+            $mutex->unlock();
         } catch (LockParamException $exception) {
             // 参数错误
         }  catch (LockFailException $exception) {
@@ -55,7 +55,7 @@ class OrderBusinessMutexExample
     
     
     /**
-     * 订单审核
+     * sass订单审核
      */
     public function orderCheck2()
     {
@@ -66,12 +66,12 @@ class OrderBusinessMutexExample
             $redis = new \Redis();
             $redis->connect($host, $post);
             $redis->auth($password);
-    
+            
             $redisRepository = new RedisLockRepository($redis);
             $expired = Helper::secondsToMilliseconds(30);
-            $orderId = 1;
-            $orderBusinessMutex = new OrderBusinessMutex($redisRepository, $expired, $orderId);
-            $orderBusinessMutex->synchronized(function(){
+            $name = 'orderCheck2';
+            $mutex = new Mutex($redisRepository, $expired, $name);
+            $mutex->synchronized(function(){
                 // todo
             });
         } catch (LockParamException $exception) {
@@ -87,3 +87,4 @@ class OrderBusinessMutexExample
         }
     }
 }
+
