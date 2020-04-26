@@ -9,15 +9,20 @@
 namespace Zwei\Sync\Tests\Mutex;
 
 
-use PHPUnit\Framework\TestCase;
-use Zwei\Sync\Exception\LockTimeoutException;
-use Zwei\Sync\Helper\Helper;
 use Zwei\Sync\Mutex\OrderBusinessMutex;
+use Zwei\Sync\Tests\Repository\MySqlRepositoryTrait;
 
-class OrderBusinessMutexTest extends TestCase
+class OrderBusinessMutexTest extends BusinessMutexTest
 {
-    use RedisTrait;
-    use RedisRepositoryTrait;
+    use MySqlRepositoryTrait;
+    
+    /**
+     * @return \Zwei\Sync\LockRepositoryInterface
+     */
+    public function getLockRepository()
+    {
+        return $this->getMySqlLockRepository();
+    }
     
     /**
      * 测试锁名
@@ -26,7 +31,7 @@ class OrderBusinessMutexTest extends TestCase
     {
         $expired = 1;
         $orderId = 1;
-        $obj = new OrderBusinessMutex($this->getRedisLockRepository(), $expired, $orderId);
-        $this->assertEquals('order:1', $obj->getName());
+        $obj = new OrderBusinessMutex($this->getLockRepository(), $expired, $orderId);
+        $this->assertEquals(['order:1'], $obj->getNames());
     }
 }

@@ -6,7 +6,7 @@
  * Time: 15:52
  */
 
-namespace Zwei\Sync\Tests\Mutex;
+namespace Zwei\Sync\Tests\Repository;
 
 
 trait MySqlPdoTrait

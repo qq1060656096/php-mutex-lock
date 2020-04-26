@@ -36,9 +36,10 @@ php 互斥锁
 ```
 CREATE TABLE `sync_lock` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `name` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL COMMENT '锁名',
   `expired` decimal(30,0) NOT NULL COMMENT '过期时间',
   `expired_time` decimal(20,0) NOT NULL DEFAULT '0' COMMENT '过期时间',
+  `client_id` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL COMMENT 'client_id',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_index` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
