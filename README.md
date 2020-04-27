@@ -1,11 +1,11 @@
 # php-sync
 php 互斥锁
 
-| 锁类型 | 堵塞类型 | 分布式 | 锁时间 | 同时多个锁加锁解锁| 
-| :------- | :----  | :----  | :----  | :----  |
-| 互斥锁(Mutex)    | 堵塞   | 支持 | 毫秒级 | 支持 |
-| 业务互斥锁(BusinessMutex)  |堵塞   | 支持 | 毫秒级 |支持 |
-| 示例订单业务互斥锁(OrderBusinessMutex) | 非堵塞  | 支持 | 毫秒级 |支持 |
+| 锁类型                               | 堵塞类型 | 分布式 | 锁时间  | 同时多个锁加锁解锁| 客户端异常终止(加锁解锁) |
+| :---------------------------------- | :------ | :----  | :---- | :-------------- | :------------------- |
+| 互斥锁(Mutex)                        | 堵塞     | 支持  | 毫秒级  | 支持            | 支持(未实现)           |
+| 业务互斥锁(BusinessMutex)             | 堵塞    | 支持   | 毫秒级 | 支持             | 支持(未实现)           |
+| 示例订单业务互斥锁(OrderBusinessMutex) | 非堵塞   | 支持   | 毫秒级 | 支持            | 支持(未实现)            |
 
 ***仓储类型请使用非堵塞类型***
 
@@ -35,10 +35,10 @@ php 互斥锁
 ### 使用Mysql仓储请导入sql到数据库中
 ```
 CREATE TABLE `sync_lock` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
   `name` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL COMMENT '锁名',
-  `expired` decimal(30,0) NOT NULL COMMENT '过期时间',
-  `expired_time` decimal(20,0) NOT NULL DEFAULT '0' COMMENT '过期时间',
+  `expired` decimal(30,0) NOT NULL COMMENT '有效期多少毫秒',
+  `expired_time` decimal(30,0) NOT NULL DEFAULT '0' COMMENT '过期时间',
   `client_id` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL COMMENT 'client_id',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_index` (`name`)
