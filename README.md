@@ -187,3 +187,13 @@ php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/O
 php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Mutex/MysqlBusinessMutexTest.php
 
 ```
+
+### redis lua脚本
+
+```sh
+# 加锁lua
+redis-cli -h 199.199.199.199 -p 16379 -a 000000 --eval src/lua/redis.lock.lua key1 key2 , clientId expired
+
+# 解锁lua
+redis-cli -h 199.199.199.199 -p 16379 -a 000000 --eval src/lua/redis.unlock.lua key1 key2 , clientId
+```

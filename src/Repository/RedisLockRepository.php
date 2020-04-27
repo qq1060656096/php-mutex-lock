@@ -23,10 +23,18 @@ class RedisLockRepository implements LockRepositoryInterface
      */
     protected $redis;
     
+    private $lockLuaScript = null;
+    
+    private $unlockLuaScript = null;
+    
     public function __construct(Redis $redis)
     {
         $this->redis = $redis;
+        $luaDir = dirname(__DIR__).DIRECTORY_SEPARATOR.'lua'.DIRECTORY_SEPARATOR;
+        $this->lockLuaScript = file_get_contents($luaDir."redis.lock.tpl.lua");
+        $this->unlockLuaScript = file_get_contents($luaDir."redis.unlock.tpl.lua");
     }
+    
     
     /**
      * @return Redis
@@ -46,35 +54,12 @@ class RedisLockRepository implements LockRepositoryInterface
         Helper::validateLockExpired($expired);
         Helper::validateLockNames(...$lockNames);
         $numKeys = count($lockNames);
-        $lua = [];
-        $lua[] = "local keysOkCount = 0;";
-        $lua[] = "local operationOk = false;";
-        $index = 0;
-        $keys = [];
-        $values = [];
-        $delKeys = [];
-        foreach ($lockNames as $key) {
-            $value = $clientId;
-            $index ++;
-            $lua[] = <<<str
-operationOk  = redis.call('set', KEYS[{$index}], ARGV[{$index}], 'PX', {$expired}, 'NX');
-str;
-            $lua[] = <<<str
-if (operationOk) then keysOkCount = keysOkCount + 1 end;
-str;
-        
-            $keys[] = $key;
-            $values[] = $value;
-            $delKeys[] = "KEYS[{$index}]";
-        }
-        $delKeysStr = implode(", ", $delKeys);
-        $lua[] = <<<str
-if (keysOkCount ~= {$numKeys}) then redis.call('del', {$delKeysStr}); keysOkCount = 0;end;
-str;
-        $lua[] = "return keysOkCount;";
-        $luaScript = implode("", $lua);
-        $args = array_merge($keys, $values);
-        $intResult = $this->getRedis()->eval($luaScript, $args, $numKeys);
+        $values = [
+            $clientId,
+        ];
+        $args = array_merge($lockNames, $values);
+        $lockLuaScript = sprintf($this->lockLuaScript, $expired);
+        $intResult = $this->getRedis()->eval($lockLuaScript, $args, $numKeys);
         if ($intResult < 1) {
             LockFailException::fail();
         }
@@ -90,28 +75,11 @@ str;
     {
         Helper::validateLockNames(...$lockNames);
         $numKeys = count($lockNames);
-        $lua = [];
-        $lua[] = "local keysDelOkCount = 0;";
-        $lua[] = "local tmpVal = nil;";
-        $index = 0;
-        $keys = [];
-        $values = [];
-        foreach ($lockNames as $key) {
-            $value = $clientId;
-            $index ++;
-            $lua[] = <<<str
-tmpVal  = redis.call('get', KEYS[{$index}]);
-str;
-            $lua[] = <<<str
-if (tmpVal == ARGV[1]) then keysDelOkCount = keysDelOkCount + redis.call('del', KEYS[{$index}]) end;
-str;
-            $keys[] = $key;
-            $values[] = $value;
-        }
-        $lua[] = "return keysDelOkCount;";
-        $luaScript = implode("", $lua);
-        $args = array_merge($keys, $values);
-        $result = $this->getRedis()->eval($luaScript, $args, $numKeys);
+        $values = [
+            $clientId
+        ];
+        $args = array_merge($lockNames, $values);
+        $result = $this->getRedis()->eval($this->unlockLuaScript, $args, $numKeys);
         if ($result < 1) {
             UnLockTimeoutException::timeout();
         }
