@@ -3,7 +3,7 @@ local operationOk = nil;
 local clientId = ARGV[1];
 local expired = %s;
 local tmpClientId = nil;
-local lockNamesLen = 2;
+local lockNamesLen = %s;
 for i, v in ipairs(KEYS) do
     operationOk  = redis.call('set', KEYS[i], clientId, 'PX', expired, 'NX');
     if (operationOk) then keysOkCount = keysOkCount + 1 end;

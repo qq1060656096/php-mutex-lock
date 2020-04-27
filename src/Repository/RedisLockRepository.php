@@ -58,7 +58,7 @@ class RedisLockRepository implements LockRepositoryInterface
             $clientId,
         ];
         $args = array_merge($lockNames, $values);
-        $lockLuaScript = sprintf($this->lockLuaScript, $expired);
+        $lockLuaScript = sprintf($this->lockLuaScript, $expired, $numKeys);
         $intResult = $this->getRedis()->eval($lockLuaScript, $args, $numKeys);
         if ($intResult < 1) {
             LockFailException::fail();
