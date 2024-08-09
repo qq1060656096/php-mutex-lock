@@ -197,3 +197,8 @@ redis-cli -h 199.199.199.199 -p 16379 -a 000000 --eval src/lua/redis.lock.lua ke
 # 解锁lua
 redis-cli -h 199.199.199.199 -p 16379 -a 000000 --eval src/lua/redis.unlock.lua key1 key2 , clientId
 ```
+
+### redis rpop 原子操作
+```sh
+php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Atomic/RedisAtomicTest.php
+```
