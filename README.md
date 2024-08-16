@@ -201,4 +201,39 @@ redis-cli -h 199.199.199.199 -p 16379 -a 000000 --eval src/lua/redis.unlock.lua 
 ### redis rpop 原子操作
 ```sh
 php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Atomic/RedisAtomicTest.php
+
+/usr/bin/php7.3 vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests/Atomic/RedisAtomicTest.php --filter=testExampleNoData
+```
+
+```php
+<?php
+use Zwei\Sync\Atomic\RedisAtomic;
+$queueName = "q1";
+$queueAckName = "q1_ack";
+
+// redis ack 队列消费
+$redis = new \Redis();
+$result = $redis->connect('172.29.112.1', 6379);
+$redisAtomic = new RedisAtomic($redis);
+// 没有数据会自动退出
+$redisAtomic->rPopAutoAck(1000, $queueName, $queueAckName, function ($data) {
+    sleep(1);
+});
+
+// 如果想一直消费直接 while(true)
+while (true) {
+    $redisAtomic->rPopAutoAck(1000, $queueName, $queueAckName, function ($data) {
+        sleep(1);
+    });
+}
+```
+
+
+```shell
+# 推送到队列
+del q1 q1c
+lpush q1 v1
+lpush q1 v2
+lpush q1 v3
+lpush q1 v4
 ```

@@ -16,7 +16,8 @@ class RedisAtomicTest extends TestCase
     public function getRedis()
     {
         $redis = new \Redis();
-        $result = $redis->connect('172.18.176.1', 6379);
+//        $result = $redis->connect('172.18.176.1', 6379);
+        $result = $redis->connect('172.29.112.1', 6379);
         return $redis;
     }
 
@@ -230,11 +231,67 @@ class RedisAtomicTest extends TestCase
         $this->assertEquals(0, $redisAtomic->getRedis()->lLen($queueAckName));
     }
 
-    public function testExample() {
+    public function testExampleNoData() {
+        $queueName = "q1";
+        $queueAckName = "q1_ack";
+
         $redisAtomic = new RedisAtomic($this->getRedis());
-        $redisAtomic->rPopAutoAck(true, "q1", "q1_ack", function ($data) {
+        $redisAtomic->getRedis()->del($queueName, $queueAckName);
+        $redisAtomic->getRedis()->lPush($queueName, "v1");
+        $redisAtomic->getRedis()->lPush($queueName, "v2");
+        $redisAtomic->getRedis()->lPush($queueName, "v3");
+        $redisAtomic->getRedis()->lPush($queueName, "v4");
+
+        $redisAtomic->rPopAutoAck(1000, $queueName, $queueAckName, function ($data) {
             var_dump($data);
+//            throw new \Exception($data);
+            sleep(1);
         });
+        $useTotalSeconds =$redisAtomic->getUseTotalSeconds();
+        $this->assertEquals(4, floor($useTotalSeconds));
     }
 
+    public function testExampleNoAckData() {
+        $queueName = "q1";
+        $queueAckName = "q1_ack";
+
+        $redisAtomic = new RedisAtomic($this->getRedis());
+        $redisAtomic->getRedis()->del($queueName, $queueAckName);
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v1");
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v2");
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v3");
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v4");
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v5");
+
+        $redisAtomic->rPopAutoAck(1000, $queueName, $queueAckName, function ($data) {
+            var_dump($data);
+//            throw new \Exception($data);
+            sleep(1);
+        });
+        $useTotalSeconds =$redisAtomic->getUseTotalSeconds();
+        $this->assertEquals(5, floor($useTotalSeconds));
+    }
+
+    public function testExampleAll() {
+        $queueName = "q1";
+        $queueAckName = "q1_ack";
+
+        $redisAtomic = new RedisAtomic($this->getRedis());
+        $redisAtomic->getRedis()->del($queueName, $queueAckName);
+        $redisAtomic->getRedis()->lPush($queueName, "v1");
+        $redisAtomic->getRedis()->lPush($queueName, "v2");
+        $redisAtomic->getRedis()->lPush($queueName, "v3");
+        $redisAtomic->getRedis()->lPush($queueName, "v4");
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v1");
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v2");
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v3");
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v4");
+        $redisAtomic->getRedis()->lPush($queueAckName, "ack_v5");
+        $redisAtomic->rPopAutoAck(2, $queueName, $queueAckName, function ($data) {
+            var_dump($data);
+            sleep(1);
+        });
+        $useTotalSeconds =$redisAtomic->getUseTotalSeconds();
+        $this->assertEquals(9, floor($useTotalSeconds));
+    }
 }
